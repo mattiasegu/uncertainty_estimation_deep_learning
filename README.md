@@ -103,7 +103,7 @@ Example:
 cd ./src
 python compare_stats.py --experiment_rootdir='./exp' --test_dir='../testing' --is_MCDO=True --T=10 
 ```
-2) Use [compare_var.py](src/compare_var.py) to evaluate variance estimates taken with MCDO on resnet8_MCDO (epistemic uncertainty), ADF on resnet8_ADF (aleatoric uncertainty) and MCDO on resnet8_ADF (total uncertainty) at varying T on the testing data from each dataset. Disregarding of how you set is_MCDO(=True or False), the code will collect statistics on variances from T = FLAGS.T forward passes. Thus, you can change the maximum number of Monte Carlo samples to take by setting T.
+2) Use [compare_var.py](src/compare_var.py) to evaluate variance estimates taken with MCDO on resnet8_MCDO (epistemic uncertainty), with ADF on resnet8_ADF (aleatoric uncertainty) or with our framework (total uncertainty) at varying T on the testing data from each dataset. Disregarding of how you set is_MCDO(=True or False), the code will collect statistics on variances from T = FLAGS.T forward passes. Thus, you can change the maximum number of Monte Carlo samples to take by setting T.
 ```
 cd ./src
 python compare_var.py [args]
