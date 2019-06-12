@@ -127,7 +127,7 @@ python compare_attacks.py --experiment_rootdir='./exp' --test_dir='../testing' -
 
 #### Acknowledgements
 
-This code follows the Keras implementation of [DroNet:Learning to Fly by Driving](https://github.com/uzh-rpg/rpg_public_dronet) for the CNN architecture, with minor changes to adapt the CNN for the study of model variance.
+This code follows the Keras implementation of [DroNet:Learning to Fly by Driving](https://github.com/uzh-rpg/rpg_public_dronet) for the CNN architecture, with minor changes to adapt the CNN to the study of model variance.
 
 ```
 @article{Loquercio_2018,
