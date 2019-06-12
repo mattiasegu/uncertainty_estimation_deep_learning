@@ -90,7 +90,7 @@ cd ./src
 python evaluation_adf.py --experiment_rootdir='./exp' --test_dir='../testing' --is_MCDO=True --T=10 
 ```
 
-### Comparing MCDO and ADF performaces
+### Comparing MCDO and ADF performances
 In this repository you can find three comparison scripts:
 
 1) Use [compare_stats.py](src/compare_stats.py) to evaluate performances (RMSE and EVA) of MCDO on resnet8_MCDO at varying T on the testing data from each dataset. Disregarding of how you set is_MCDO(=True or False), the code will collect statistics on RMSE and EVA for each number of samples T from 0 (is_MCDO=False) to T = FLAGS.T. Thus, you can change the maximum number of Monte Carlo samples to take by setting T. The script will also show samples of images with low/high epistemic and total uncertainty.
