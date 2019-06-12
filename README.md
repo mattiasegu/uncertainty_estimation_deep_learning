@@ -1,8 +1,9 @@
-# Variational Inference Models: A study
-This repository contains the code used to train and evaluate a framework that can predict steering angle from single images, together with epistemic, aleatoric and total variance.
+# A General Framework for Uncertainty Estimation in Deep Learning
+This repository provides the code used to implement the framework to provide uncertainty estimates for Deep Learning predictions as described in "A General Framework for Uncertainty Estimation in Deep Learning" (Segù et al., 2019).
+The code used to train and evaluate a framework that can predict steering angle from single images, together with epistemic, aleatoric and total variance, is here provided.
 
 ## Introduction
-The project is centered around the problem of probabilistic modelling for the output of neural networks. We investigated many possibilities to make this, evaluating their pro/cons and getting an idea on how to improve current methods. With a particular focus on [Lightweight Probabilistic Deep Networks](https://arxiv.org/pdf/1805.11327.pdf), a lightweight method for estimating aleatoric variance, we decided to prove how, in many real-life applications, model variance plays a relevant role in variance estimation.  This is in contrast with Gast and Roth claim. They indeed stated that, with a sufficient amount of training data, epistemic (model) variance can be explained away. Hence, they developed an approach that estimates aleatoric variance with a single forward pass. In this repository we provide the implementation of a framework that trains a CNN model and evaluates all the variance components, showing that the order of magnitude of epistemic uncertainty is comparable to aleatoric uncertainty one. 
+Our work is centered around the problem of probabilistic modelling for the output of neural networks. We investigated many possibilities to make this, evaluating their pro/cons and getting an idea on how to improve current methods. With a particular focus on [Lightweight Probabilistic Deep Networks](https://arxiv.org/pdf/1805.11327.pdf), a lightweight method for estimating aleatoric variance, we decided to prove how, in many real-life applications, model variance plays a relevant role in variance estimation.  This is in contrast with Gast and Roth claim. They indeed stated that, with a sufficient amount of training data, epistemic (model) variance can be explained away. Hence, they developed an approach that estimates aleatoric variance with a single forward pass. In this repository we provide the implementation of a framework, suitable to any existing/trained network, that trains a CNN model and evaluates all the variance components. Moreover, our framework is *robust to adversarial attacks*. 
 
 ### Models
 We took inspiration from [DroNet:Learning to Fly by Driving](https://github.com/uzh-rpg/rpg_public_dronet) for our CNN model. DroNet has been designed as a forked CNN that predicts, from a single 200×200 frame in gray-scale, a steering angle and a collision probability. The shared part of the architecture consists of a fast ResNet-8 with 3 residual blocks, followed by dropout and ReLU non-linearity. After them, the network branches into two separated fully-connected layers, one to carry out steering prediction, and the other one to infer collision probability. For our analysis, we decided to reproduce in PyTorch only the steering angle prediction branch, introducing Dropout layers after every Conv2d layer in order to estimate model variance with Monte Carlo Dropout. We called the resulting model resnet8_MCDO. See ```src/model_zoo/models_resnet8.py``` for more details.
@@ -137,7 +138,7 @@ This code follows the Keras implementation of [DroNet:Learning to Fly by Driving
 	journal = {{IEEE} Robotics and Automation Letters}
 }
 ```
-This code follows ADF implementation from the paper [Lightweight Probabilistic Deep Networks](https://arxiv.org/pdf/1805.11327.pdf), introducing the probabilistic version of more PyTorch layers.
+This code follows and revises ADF implementation from the paper [Lightweight Probabilistic Deep Networks](https://arxiv.org/pdf/1805.11327.pdf), introducing the probabilistic version of more PyTorch layers.
 
 ```
 @inproceedings{Gast:2018:LPD,
