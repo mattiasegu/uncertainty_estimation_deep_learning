@@ -245,9 +245,9 @@ class resnet8_MCDO(nn.Module):
         return out
 
 
-class resnet8_MCDO_het(nn.Module):
+class resnet8_MCDO_ale(nn.Module):
     """
-    Define model architecture. This is the architecture used to compute variances.
+    Define model architecture.
     
     # Arguments
        img_channels: Number of channels in target image

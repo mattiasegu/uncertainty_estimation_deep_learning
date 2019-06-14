@@ -45,6 +45,8 @@ parser.add_argument('--experiment_rootdir_het', type=str, default="../exp_het",
                     help='Folder containing logs, model weights and results')
 parser.add_argument('--experiment_rootdir_comp', type=str, default="../exp_comp", 
                     help='Folder containing logs, model weights and results')
+parser.add_argument('--experiment_rootdir_video', type=str, default="../exp_video", 
+                    help='Folder containing video')
 parser.add_argument('--experiment_rootdir_comp_adf', type=str, default="../exp_comp_adf", 
                     help='Folder containing logs, model weights and results')
 parser.add_argument('--train_dir', type=str, default="../data/training", 
@@ -55,8 +57,10 @@ parser.add_argument('--test_dir', type=str, default="../data/testing",
                     help='Folder containing testing experiments')
 
 # Testing
-parser.add_argument('--T', type=int, default=20, 
+parser.add_argument('--T', type=int, default=50, 
                          help='Number of tests for MC Dropout')
+#parser.add_argument('--tau', type=float, default=0.1, 
+#                         help='Noise on input data')
 parser.add_argument('--noise_var', type=float, default=1e-3, 
                          help='Noise Variance on input data')
 parser.add_argument('--min_var', type=float, default=1e-3, 
@@ -72,6 +76,6 @@ parser.add_argument('--is_MCDO', type=lambda x: (str(x).lower() == 'true'),
 parser.add_argument('--gen_adv_key', type=str, default='high_var', 
                          help='Select key for adversarial example generation: '
                               'low_var, high_var')
-parser.add_argument('--epsilon', type=float, default=0.1, 
+parser.add_argument('--epsilon', type=float, default=0.01, 
                          help='Epsilon for adversarial examples generation')
 
