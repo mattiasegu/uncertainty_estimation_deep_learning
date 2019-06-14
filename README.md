@@ -66,8 +66,22 @@ cd ./src
 python train.py --experiment_rootdir='./exp/' --train_dir='../data/training' --val_dir='../data/validation' --batch_size=16 --epochs=150
 ```
 
-### Evaluating resnet8_MCDO
-In this repository you can find two evaluation scripts:
+### Training resnet8_MCDO_ale
+Train resnet8_MCDO_ale (the heteroscedastic version of our CNN, which directly outputs also aleatoric uncertainty estimate) from scratch:
+```
+cd ./src
+python train_heteroscedastic.py [args]
+```
+Use ```[args]``` to set batch size, number of epochs, dataset directories, etc. Check ```opts.py``` to see the description of each arg, and the default values we used for our experiments.
+
+Example:
+```
+cd ./src
+python train_heteroscedastic.py --experiment_rootdir='./exp/' --train_dir='../data/training' --val_dir='../data/validation' --batch_size=16 --epochs=150
+```
+
+### Evaluation scripts
+In this repository you can find the following evaluation scripts:
 
 1) Use [evaluation.py](src/evaluation.py) to evaluate our model on the testing data from each dataset. If is_MCDO=True, the script writes also a file including estimates of model variance for each input sample. When is_MCDO=True, you can change the number of Monte Carlo samples to take by setting T.
 ```
@@ -89,8 +103,18 @@ Example:
 cd ./src
 python evaluation_adf.py --experiment_rootdir='./exp' --test_dir='../testing' --is_MCDO=True --T=10 
 ```
+2) Use [evaluation_het.py](src/evaluation_adf.py) to evaluate the heteroscedastic version of our model (resnet8_MCDO_ale) on the testing data from each dataset. If is_MCDO=False, the script writes a file including estimates of aleatoric variance for each input sample. If is_MCDO=True, the script writes a file including estimates of total variance for each input sample. When is_MCDO=True, you can change the number of Monte Carlo samples to take by setting T.
+```
+cd ./src
+python evaluation_het.py [args]
+```
+Example:
+```
+cd ./src
+python evaluation_het.py --experiment_rootdir='./exp' --test_dir='../testing' --is_MCDO=True --T=10 
+```
 
-### Comparing MCDO and ADF performances
+### Comparing MCDO, ADF and Heteroscedastic NN performances
 In this repository you can find three comparison scripts:
 
 1) Use [compare_stats.py](src/compare_stats.py) to evaluate performances (RMSE and EVA) of MCDO on resnet8_MCDO at varying T on the testing data from each dataset. Disregarding of how you set is_MCDO(=True or False), the code will collect statistics on RMSE and EVA for each number of samples T from 0 (is_MCDO=False) to T = FLAGS.T. Thus, you can change the maximum number of Monte Carlo samples to take by setting T. The script will also show samples of images with low/high epistemic and total uncertainty.
@@ -103,7 +127,7 @@ Example:
 cd ./src
 python compare_stats.py --experiment_rootdir='./exp' --test_dir='../testing' --is_MCDO=True --T=10 
 ```
-2) Use [compare_var.py](src/compare_var.py) to evaluate variance estimates taken with MCDO on resnet8_MCDO (epistemic uncertainty), with ADF on resnet8_ADF (aleatoric uncertainty) or with our framework (total uncertainty) at varying T on the testing data from each dataset. Disregarding of how you set is_MCDO(=True or False), the code will collect statistics on variances from T = FLAGS.T forward passes. Thus, you can change the maximum number of Monte Carlo samples to take by setting T.
+2) Use [compare_var.py](src/compare_var.py) to evaluate variance estimates taken with MCDO on resnet8_MCDO (epistemic uncertainty), with ADF on resnet8_ADF (aleatoric uncertainty), with Heteroscedastic NN or with our framework (total uncertainty) at varying T on the testing data from each dataset. Disregarding of how you set is_MCDO(=True or False), the code will collect statistics on variances from T = FLAGS.T forward passes. Thus, you can change the maximum number of Monte Carlo samples to take by setting T.
 ```
 cd ./src
 python compare_var.py [args]
@@ -127,7 +151,7 @@ python compare_attacks.py --experiment_rootdir='./exp' --test_dir='../testing' -
 
 #### Acknowledgements
 
-This code follows the Keras implementation of [DroNet:Learning to Fly by Driving](https://github.com/uzh-rpg/rpg_public_dronet) for the CNN architecture, with minor changes to adapt the CNN to the study of model variance.
+This code adapts to PyTorch the Keras implementation of [DroNet:Learning to Fly by Driving](https://github.com/uzh-rpg/rpg_public_dronet) for the CNN architecture, with minor changes to adapt the CNN to the study of model variance.
 
 ```
 @article{Loquercio_2018,
