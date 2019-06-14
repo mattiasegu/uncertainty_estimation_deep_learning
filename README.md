@@ -2,6 +2,9 @@
 This repository provides the code used to implement the framework to provide uncertainty estimates for Deep Learning predictions as described in "A General Framework for Uncertainty Estimation in Deep Learning" (Segù et al., 2019).
 The code used to train and evaluate a framework that can predict steering angle from single images, together with epistemic, aleatoric and total variance, is here provided.
 
+## Video
+CHECK OUT a video demo of our framework [HERE](https://www.youtube.com/watch?v=RSiE-bOt7IY).
+
 ## Introduction
 Our work is centered around the problem of probabilistic modelling for the output of neural networks. We investigated many possibilities to make this, evaluating their pro/cons and getting an idea on how to improve current methods. With a particular focus on [Lightweight Probabilistic Deep Networks](https://arxiv.org/pdf/1805.11327.pdf), a lightweight method for estimating aleatoric variance, we decided to prove how, in many real-life applications, model variance plays a relevant role in variance estimation.  This is in contrast with Gast and Roth claim. They indeed stated that, with a sufficient amount of training data, epistemic (model) variance can be explained away. Hence, they developed an approach that estimates aleatoric variance with a single forward pass. In this repository we provide the implementation of a framework, suitable to any existing/trained network, that trains a CNN model and evaluates all the variance components. Moreover, our framework is *robust to adversarial attacks*. 
 
@@ -148,6 +151,17 @@ cd ./src
 python compare_attacks.py --experiment_rootdir='./exp' --test_dir='../testing' --is_MCDO=True --T=10 --gen_adv_key='low_var'
 ```
 
+### Video
+To reproduce the full video demo of our framework [(HERE)](https://www.youtube.com/watch?v=RSiE-bOt7IY), run the script [create_video.py](src/create_video.py):
+```
+cd ./src
+python create_video.py [args]
+```
+Example:
+```
+cd ./src
+python create_video.py --is_MCDO=True --T=50
+```
 
 #### Acknowledgements
 
