@@ -23,15 +23,13 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def main(FLAGS):
-    
-    if not os.path.exists(FLAGS.experiment_rootdir_video):
-        os.makedirs(FLAGS.experiment_rootdir_video)
         
     # Train only if cuda is available
     if device.type == 'cuda':
-        # Create the experiment rootdir adf if not already there
-        if not os.path.exists(FLAGS.experiment_rootdir):
-            os.makedirs(FLAGS.experiment_rootdir_adf)
+        # Create the experiment rootdir video if not already there
+        if not os.path.exists(FLAGS.experiment_rootdir_video):
+            os.makedirs(FLAGS.experiment_rootdir_video)
+
         # Hyperparameters
         batch_size = FLAGS.batch_size # Default 32
         
@@ -75,7 +73,7 @@ def main(FLAGS):
         _, predictions_mean, ale_variances, _, tot_variances = \
         utils.compute_predictions_and_gt_adf(model_adf, test_loader, device, FLAGS)
         
-        """Preds from here will be referred to each video in test folder, they should be ordered"""
+        # Preds from here will be referred to each video in test folder
         frames_dir = os.path.join(FLAGS.test_dir,"HMB_3", "center")            
         ls_frames = sorted(os.listdir(frames_dir))
 
@@ -89,24 +87,20 @@ def main(FLAGS):
         axes = (radius,radius)
         angle=270
         
+        # Generate and write each frame of the video
         for i, frame_name in bar(enumerate(ls_frames)):
             frame = cv2.imread(os.path.join(frames_dir,frame_name))
             cv2.circle(frame,center, radius, (255,0,0), 6)
-            """Here print the circle shaded section, befor arrow"""
             std_dev = np.sqrt(tot_variances[i])
-#            std_dev = tot_variances[i]
             startAngle=int(-np.rad2deg(predictions_mean[i]-3*std_dev))
             endAngle=int(-np.rad2deg(predictions_mean[i]+3*std_dev))
             cv2.ellipse(frame, center, axes, angle, startAngle, endAngle, (0,255,255), -2) #yellow
-#            cv2.ellipse(frame, center, axes, angle, startAngle, endAngle, (235,244,68), -2) #light blue
             startAngle=int(-np.rad2deg(predictions_mean[i]-2*std_dev))
             endAngle=int(-np.rad2deg(predictions_mean[i]+2*std_dev))
             cv2.ellipse(frame, center, axes, angle, startAngle, endAngle, (28,184,255), -2) #orange
-#            cv2.ellipse(frame, center, axes, angle, startAngle, endAngle, (167,252,68), -2) #marine blue
             startAngle=int(-np.rad2deg(predictions_mean[i]-std_dev))
             endAngle=int(-np.rad2deg(predictions_mean[i]+std_dev))
             cv2.ellipse(frame, center, axes, angle, startAngle, endAngle, (0,0,255), -2) #red
-#            cv2.ellipse(frame, center, axes, angle, startAngle, endAngle, (255,0,0), -2) #blue
             pt2_x_off = np.sin(predictions_mean[i])
             pt2_y_off = np.cos(predictions_mean[i])
             pt2_x = np.round(center[0]-radius*pt2_x_off)
@@ -128,11 +122,7 @@ def main(FLAGS):
         writer.release()
 
 
-        """ A cool thing to do would be to extend the video to adversarial attacks, maybe showing in parallel the same video with and without adversarial attacks
-        - normal video
-        - attacks in range (I can try with unrealistic but in range so it is visible)
-        - attacks out of range
-        """
+        #TODO: extend the video to adversarial attacks
     else:
         raise IOError('Cuda is not available.')
 
