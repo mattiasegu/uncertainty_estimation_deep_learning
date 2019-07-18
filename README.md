@@ -1,5 +1,5 @@
 # A General Framework for Uncertainty Estimation in Deep Learning
-This repository provides the code used to implement the framework to provide uncertainty estimates for Deep Learning predictions as described in "A General Framework for Uncertainty Estimation in Deep Learning" (Segù et al., 2019).
+This repository provides the code used to implement the framework to provide uncertainty estimates for Deep Learning predictions as described in ["A General Framework for Uncertainty Estimation in Deep Learning" (Segù et al., 2019)](https://arxiv.org/abs/1907.06890).
 The code used to train and evaluate a framework that can predict steering angle from single images, together with epistemic, aleatoric and total variance, is here provided.
 
 ## Video
