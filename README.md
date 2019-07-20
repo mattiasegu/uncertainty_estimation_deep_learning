@@ -152,7 +152,7 @@ python compare_attacks.py --experiment_rootdir='./exp' --test_dir='../testing' -
 ```
 
 ### Video
-To reproduce the full video demo of our framework [(HERE)](https://www.youtube.com/watch?v=RSiE-bOt7IY), run the script [create_video.py](src/create_video.py):
+To reproduce the full video demo of our framework [(HERE)](https://youtu.be/1JtU78Heceg), run the script [create_video.py](src/create_video.py):
 ```
 cd ./src
 python create_video.py [args]
@@ -176,7 +176,7 @@ This code adapts to PyTorch the Keras implementation of [DroNet:Learning to Fly 
 	journal = {{IEEE} Robotics and Automation Letters}
 }
 ```
-This code follows and revises ADF implementation from the paper [Lightweight Probabilistic Deep Networks](https://arxiv.org/pdf/1805.11327.pdf), introducing the probabilistic version of more PyTorch layers.
+This code follows and revises ADF implementation from the paper [Lightweight Probabilistic Deep Networks](https://arxiv.org/pdf/1805.11327.pdf), introducing and improving the probabilistic version of more PyTorch layers.
 
 ```
 @inproceedings{Gast:2018:LPD,
