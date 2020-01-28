@@ -5,12 +5,11 @@ from __future__ import print_function
 import operator
 from collections import OrderedDict
 from itertools import islice
-import numpy as np
 
 import torch
 import torch.nn as nn
 from torch.nn.parameter import Parameter
-from torch.nn import functional as tf
+from torch.nn import functional as F
 from torch.nn.modules.conv import _ConvNd
 from torch.nn.modules.conv import _ConvTransposeMixin
 from torch.nn.modules.utils import _pair
@@ -18,6 +17,58 @@ from torch.nn.modules.utils import _pair
 from contrib.interpolation import resize2D_as
 from contrib.math import normpdf, normcdf
 
+
+
+class AvgPool2d(nn.Module):
+    def __init__(self, keep_variance_fn=None):
+        super(AvgPool2d, self).__init__()
+        self._keep_variance_fn = keep_variance_fn
+        
+    def forward(self, inputs_mean, inputs_variance, kernel_size):
+        outputs_mean = F.avg_pool2d(inputs_mean, kernel_size)
+        outputs_variance = F.avg_pool2d(inputs_variance, kernel_size)
+        outputs_variance = outputs_variance/(inputs_mean.size(2)*inputs_mean.size(3))
+        
+        if self._keep_variance_fn is not None:
+            outputs_variance = self._keep_variance_fn(outputs_variance)
+            
+        # TODO: avg pooling means that every neuron is multiplied by the same 
+        #       weight, that is 1/number of neurons in the channel 
+        #      outputs_variance*1/(H*W) should be enough already
+        
+        return outputs_mean, outputs_variance
+    
+    
+class Softmax(nn.Module):
+    def __init__(self, dim=1, keep_variance_fn=None):
+        super(Softmax, self).__init__()
+        self.dim = dim
+        self._keep_variance_fn = keep_variance_fn
+
+    def forward(self, features_mean, features_variance, eps=1e-5):
+        """Softmax function applied to a multivariate Gaussian distribution.
+        It works under the assumption that features_mean and features_variance 
+        are the parameters of a the indepent gaussians that contribute to the 
+        multivariate gaussian. 
+        Mean and variance of the log-normal distribution are computed following
+        https://en.wikipedia.org/wiki/Log-normal_distribution."""
+        
+        log_gaussian_mean = features_mean + 0.5 * features_variance
+        log_gaussian_variance = 2 * log_gaussian_mean
+        
+        log_gaussian_mean = torch.exp(log_gaussian_mean)
+        log_gaussian_variance = torch.exp(log_gaussian_variance)
+        log_gaussian_variance = log_gaussian_variance*(torch.exp(features_variance)-1)
+        
+        constant = torch.sum(log_gaussian_mean, dim=self.dim) + eps
+        constant = constant.unsqueeze(self.dim)
+        outputs_mean = log_gaussian_mean/constant
+        outputs_variance = log_gaussian_variance/(constant**2)
+        
+        if self._keep_variance_fn is not None:
+            outputs_variance = self._keep_variance_fn(outputs_variance)
+        return outputs_mean, outputs_variance
+    
 
 class ReLU(nn.Module):
     def __init__(self, keep_variance_fn=None):
@@ -66,33 +117,24 @@ class LeakyReLU(nn.Module):
             outputs_variance = self._keep_variance_fn(outputs_variance)
         return outputs_mean, outputs_variance
 
+
 class Dropout(nn.Module):
-    def __init__(self, p: float = 0.5, keep_variance_fn=None):
+    """ADF implementation of nn.Dropout2d"""
+    def __init__(self, p: float = 0.5, keep_variance_fn=None, inplace=False):
         super(Dropout, self).__init__()
         self._keep_variance_fn = keep_variance_fn
+        self.inplace = inplace
         if p < 0 or p > 1:
             raise ValueError("dropout probability has to be between 0 and 1, " "but got {}".format(p))
         self.p = p
 
     def forward(self, inputs_mean, inputs_variance):
         if self.training:
-            pKeep = 1-self.p
+            binary_mask = torch.ones_like(inputs_mean)
+            binary_mask = F.dropout2d(binary_mask, self.p, self.training, self.inplace)
             
-            device = torch.device('cuda' if inputs_mean.is_cuda else 'cpu')
-
-            binary_mask = torch.rand(inputs_mean.size(1)) < pKeep
-            z = (torch.ones(inputs_mean.size(1))*binary_mask.float()).to(device)
-
-            z *= (1.0/(1-self.p))
-            
-            
-            outputs_mean= inputs_mean
-            for i in range(outputs_mean.size(1)):
-                outputs_mean[:,i,:,:]=outputs_mean[:,i,:,:]*z[i]
-            
-            outputs_variance = inputs_variance
-            for i in range(outputs_variance.size(1)):
-                outputs_variance[:,i,:,:]=outputs_variance[:,i,:,:]*z[i]**2
+            outputs_mean = inputs_mean*binary_mask
+            outputs_variance = inputs_variance*binary_mask**2
             
             if self._keep_variance_fn is not None:
                 outputs_variance = self._keep_variance_fn(outputs_variance)
@@ -160,8 +202,8 @@ class Linear(nn.Module):
             self.register_parameter('bias', None)
 
     def forward(self, inputs_mean, inputs_variance):
-        outputs_mean = tf.linear(inputs_mean, self.weight, self.bias)
-        outputs_variance = tf.linear(inputs_variance, self.weight**2, None)
+        outputs_mean = F.linear(inputs_mean, self.weight, self.bias)
+        outputs_variance = F.linear(inputs_variance, self.weight**2, None)
         if self._keep_variance_fn is not None:
             outputs_variance = self._keep_variance_fn(outputs_variance)
         return outputs_mean, outputs_variance
@@ -229,13 +271,17 @@ class BatchNorm2d(nn.Module):
                 else:  # use exponential moving average
                     exponential_average_factor = self.momentum
 
-        outputs_mean = tf.batch_norm(
+        outputs_mean = F.batch_norm(
             inputs_mean, self.running_mean, self.running_var, self.weight, self.bias,
             self.training or not self.track_running_stats,
             exponential_average_factor, self.eps)
         outputs_variance = inputs_variance
+        weight = ((self.weight.unsqueeze(0)).unsqueeze(2)).unsqueeze(3)
+        outputs_variance = outputs_variance*weight**2
+        """
         for i in range(outputs_variance.size(1)):
-            outputs_variance[:,i,:,:]=outputs_variance[:,i,:,:]*self.weight[i]**2
+            outputs_variance[:,i,:,:]=outputs_variance[:,i,:,:].clone()*self.weight[i]**2
+        """
         if self._keep_variance_fn is not None:
             outputs_variance = self._keep_variance_fn(outputs_variance)
         return outputs_mean, outputs_variance
@@ -244,7 +290,7 @@ class BatchNorm2d(nn.Module):
 class Conv2d(_ConvNd):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True,
-                 keep_variance_fn=None):
+                 keep_variance_fn=None, padding_mode='zeros'):
         self._keep_variance_fn = keep_variance_fn
         kernel_size = _pair(kernel_size)
         stride = _pair(stride)
@@ -252,12 +298,12 @@ class Conv2d(_ConvNd):
         dilation = _pair(dilation)
         super(Conv2d, self).__init__(
             in_channels, out_channels, kernel_size, stride, padding, dilation,
-            False, _pair(0), groups, bias)
+            False, _pair(0), groups, bias, padding_mode)
 
     def forward(self, inputs_mean, inputs_variance):
-        outputs_mean = tf.conv2d(
+        outputs_mean = F.conv2d(
             inputs_mean, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
-        outputs_variance = tf.conv2d(
+        outputs_variance = F.conv2d(
             inputs_variance, self.weight ** 2, None, self.stride, self.padding, self.dilation, self.groups)
         if self._keep_variance_fn is not None:
             outputs_variance = self._keep_variance_fn(outputs_variance)
@@ -267,7 +313,7 @@ class Conv2d(_ConvNd):
 class ConvTranspose2d(_ConvTransposeMixin, _ConvNd):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, output_padding=0, groups=1, bias=True, dilation=1,
-                 keep_variance_fn=None):
+                 keep_variance_fn=None, padding_mode='zeros'):
         self._keep_variance_fn = keep_variance_fn
         kernel_size = _pair(kernel_size)
         stride = _pair(stride)
@@ -276,14 +322,14 @@ class ConvTranspose2d(_ConvTransposeMixin, _ConvNd):
         output_padding = _pair(output_padding)
         super(ConvTranspose2d, self).__init__(
             in_channels, out_channels, kernel_size, stride, padding, dilation,
-            True, output_padding, groups, bias)
+            True, output_padding, groups, bias, padding_mode)
 
     def forward(self, inputs_mean, inputs_variance, output_size=None):
-        output_padding = self._output_padding(inputs_mean, output_size)
-        outputs_mean = tf.conv_transpose2d(
+        output_padding = self._output_padding(inputs_mean, output_size, self.stride, self.padding, self.kernel_size)
+        outputs_mean = F.conv_transpose2d(
             inputs_mean, self.weight, self.bias, self.stride, self.padding,
             output_padding, self.groups, self.dilation)
-        outputs_variance = tf.conv_transpose2d(
+        outputs_variance = F.conv_transpose2d(
             inputs_variance, self.weight ** 2, None, self.stride, self.padding,
             output_padding, self.groups, self.dilation)
         if self._keep_variance_fn is not None:

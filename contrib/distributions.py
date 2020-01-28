@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import torch
 import torch.nn as nn
-# from torch.autograd import Variable
 from torch.distributions.dirichlet import Dirichlet as TorchDirichlet
 
 
@@ -67,7 +66,6 @@ class SmoothOneHot(nn.Module):
             # self._one_hot.scatter_(1, false_indices.view(-1,1), self._ones)
 
             # one_hot_labels = self._one_hot * 1.0
-            # import pdb; pdb.set_trace()  # breakpoint 7154cd06 //
 
             return one_hot_labels
 
