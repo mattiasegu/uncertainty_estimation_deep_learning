@@ -1,5 +1,5 @@
 # A General Framework for Uncertainty Estimation in Deep Learning
-This repository provides the code used to implement the framework to provide Deep Learning models with total uncertainty estimates as described in ["A General Framework for Uncertainty Estimation in Deep Learning" (Loquercio, Segù, Scaramuzza. RA-L 2019)](https://arxiv.org/abs/1907.06890).
+This repository provides the code used to implement the framework to provide deep learning models with total uncertainty estimates as described in ["A General Framework for Uncertainty Estimation in Deep Learning" (Loquercio, Segù, Scaramuzza. RA-L 2019)](https://arxiv.org/abs/1907.06890).
 The code used to train and evaluate our framework on CIFAR10 is here provided and ready to use.
 
 ## Video
