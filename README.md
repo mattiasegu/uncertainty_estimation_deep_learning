@@ -65,3 +65,8 @@ $ python eval.py -r -b -m \
     --noise_variance 1e-3 \
     --num_samples 20
 ```
+
+## Acknowledgments
+The implementation of the ADF distribution propagation is mainly derived from the paper ["Lightweight Probabilistic Deep Networks" (Gast et al., CVPR 2018)](https://arxiv.org/abs/1805.11327).
+
+If you cite our paper, please consider citing also their work.
