@@ -10,7 +10,7 @@ If you use this code in academic context, please cite the following publication:
   year={2019}
 }
 
-![Illustration of our proposed method for uncertainty estimation.](method.pdf)
+![Illustration of our proposed method for uncertainty estimation.](method.jpg)
 
 ## Video
 CHECK OUT a video demo of our framework [HERE](https://www.youtube.com/watch?v=X7n-bRS5vSM).
