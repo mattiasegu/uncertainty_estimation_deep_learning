@@ -8,7 +8,8 @@ If you use this code in academic context, please cite the following publication:
   author={Seg{\`u}, Mattia and Loquercio, Antonio and Scaramuzza, Davide},
   journal={arXiv preprint arXiv:1907.06890},
   year={2019}
-}```
+}
+```
 
 ![Illustration of our proposed method for uncertainty estimation.](method.jpg)
 
