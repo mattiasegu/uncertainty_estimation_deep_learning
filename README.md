@@ -1,6 +1,16 @@
 # A General Framework for Uncertainty Estimation in Deep Learning
-This repository provides the code used to implement the framework to provide deep learning models with total uncertainty estimates as described in ["A General Framework for Uncertainty Estimation in Deep Learning" (Loquercio, Segù, Scaramuzza. RA-L 2019)](https://arxiv.org/abs/1907.06890).
+This repository provides the code used to implement the framework to provide deep learning models with total uncertainty estimates as described in ["A General Framework for Uncertainty Estimation in Deep Learning" (Loquercio, Segù, Scaramuzza. RA-L 2020)](http://rpg.ifi.uzh.ch/docs/RAL20_Loquercio.pdf).
 The code used to train and evaluate our framework on CIFAR10 is here provided and ready to use.
+
+If you use this code in academic context, please cite the following publication:
+@article{segu2019general,
+  title={A general framework for uncertainty estimation in deep learning},
+  author={Seg{\`u}, Mattia and Loquercio, Antonio and Scaramuzza, Davide},
+  journal={arXiv preprint arXiv:1907.06890},
+  year={2019}
+}
+
+![Illustration of our proposed method for uncertainty estimation.](method.pdf)
 
 ## Video
 CHECK OUT a video demo of our framework [HERE](https://www.youtube.com/watch?v=X7n-bRS5vSM).
@@ -67,6 +77,4 @@ $ python eval.py -r -b -m \
 ```
 
 ## Acknowledgments
-The implementation of the ADF distribution propagation is mainly derived from the paper ["Lightweight Probabilistic Deep Networks" (Gast et al., CVPR 2018)](https://arxiv.org/abs/1805.11327).
-
-If you cite our paper, please consider citing also their work.
+The implementation of the ADF distribution propagation is partially derived from the paper ["Lightweight Probabilistic Deep Networks" (Gast et al., CVPR 2018)](https://arxiv.org/abs/1805.11327). We thank the authors for providing us their code.
