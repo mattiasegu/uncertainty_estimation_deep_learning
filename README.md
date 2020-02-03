@@ -33,6 +33,7 @@ $ pip install -r requirements.txt
 
 ## Pre-trained Models
 You can download pre-trained models with and without dropout at training time [HERE](https://drive.google.com/drive/folders/1gu0nUxzcj2gonon55L0oi6kTjeD6T1v7?usp=sharing).
+Move the pre-trained models in the `./checkpoint` folder. If it does not exist yet, create it in the main folder.
 
 ## Training
 You can start a training with
