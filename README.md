@@ -4,11 +4,12 @@ The code used to train and evaluate our framework on CIFAR10 is here provided an
 
 If you use this code in academic context, please cite the following publication:
 ```
-@article{segu2019general,
-  title={A general framework for uncertainty estimation in deep learning},
-  author={Seg{\`u}, Mattia and Loquercio, Antonio and Scaramuzza, Davide},
-  journal={arXiv preprint arXiv:1907.06890},
-  year={2019}
+@article{loquercio_segu_2020,
+  title={A General Framework for Uncertainty Estimation in Deep Learning},
+  author={Loquercio, Antonio and Segu, Mattia and Scaramuzza, Davide},
+  journal={IEEE Robotics and Automation Letters},
+  year={2020},
+  publisher={IEEE}
 }
 ```
 
