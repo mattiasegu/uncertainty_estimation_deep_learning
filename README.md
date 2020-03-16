@@ -35,6 +35,13 @@ $ pip install -r requirements.txt
 You can download pre-trained models with and without dropout at training time [HERE](https://drive.google.com/drive/folders/1gu0nUxzcj2gonon55L0oi6kTjeD6T1v7?usp=sharing).
 Move the pre-trained models in the `./checkpoint` folder. If it does not exist yet, create it in the main directory.
 
+## Prerequisites
+- torch 1.4.0
+- torchvision 0.5.0
+
+## Data
+The framework is trained on the CIFAR-10 dataset, automatically downloaded when calling `torchvision.datasets.CIFAR10(...)` with `download=True`.
+
 ## Training
 You can start a training with
 
