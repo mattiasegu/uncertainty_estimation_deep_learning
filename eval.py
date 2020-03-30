@@ -33,7 +33,7 @@ parser.add_argument('--tau', default=1e-4, type=float,
 parser.add_argument('--load_model_name', default='resnet18_dropout', type=str,  
                     help='model to load')
 parser.add_argument('--test_model_name', default='resnet18_dropout_adf', type=str,  
-                    help='model to load')
+                    help='model to test')
 parser.add_argument('--resume', '-r', action='store_true', default=True, 
                     help='resume from checkpoint')
 parser.add_argument('--show_bar', '-b', action='store_true', default=True, 
@@ -117,8 +117,8 @@ if args.resume:
     assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
     
     model_to_load = args.load_model_name.lower()
-    if model_to_load.endswith('adf'):
-        model_to_load = model_to_load[0:-4]
+    # if model_to_load.endswith('adf'):
+    #     model_to_load = model_to_load[0:-4]
     ckpt_path = './checkpoint/ckpt_{}.pth'.format(model_to_load)
     checkpoint = torch.load(ckpt_path)
     if args.verbose: print('Loaded checkpoint at location {}'.format(ckpt_path))
