@@ -120,7 +120,7 @@ if args.resume:
     # if model_to_load.endswith('adf'):
     #     model_to_load = model_to_load[0:-4]
     ckpt_path = './checkpoint/ckpt_{}.pth'.format(model_to_load)
-    checkpoint = torch.load(ckpt_path)
+    checkpoint = torch.load(ckpt_path,map_location=torch.device(device))
     if args.verbose: print('Loaded checkpoint at location {}'.format(ckpt_path))
     net.load_state_dict(checkpoint['net'])
     best_acc = checkpoint['acc']
