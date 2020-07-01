@@ -122,7 +122,7 @@ if args.resume:
     ckpt_path = './checkpoint/ckpt_{}.pth'.format(model_to_load)
     checkpoint = torch.load(ckpt_path,map_location=torch.device(device))
     if args.verbose: print('Loaded checkpoint at location {}'.format(ckpt_path))
-    net.load_state_dict(checkpoint['net'])
+    net.load_state_dict(checkpoint['net'],strict=False)
     best_acc = checkpoint['acc']
     start_epoch = checkpoint['epoch']
 
