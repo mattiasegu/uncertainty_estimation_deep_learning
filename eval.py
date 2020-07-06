@@ -120,9 +120,20 @@ if args.resume:
     # if model_to_load.endswith('adf'):
     #     model_to_load = model_to_load[0:-4]
     ckpt_path = './checkpoint/ckpt_{}.pth'.format(model_to_load)
-    checkpoint = torch.load(ckpt_path)
+    checkpoint = torch.load(ckpt_path,map_location=torch.device(device))
     if args.verbose: print('Loaded checkpoint at location {}'.format(ckpt_path))
-    net.load_state_dict(checkpoint['net'])
+    
+    #Preliminary bugfix for CPU execution
+    state_dict = checkpoint['net']
+    if device == 'cpu':
+        from collections import OrderedDict
+        new_state_dict = OrderedDict()
+        for k, v in state_dict.items():
+            name = k[7:] # remove 'module.' of dataparallel
+            new_state_dict[name]=v
+        state_dict = new_state_dict
+    net.load_state_dict(new_state_dict)
+
     best_acc = checkpoint['acc']
     start_epoch = checkpoint['epoch']
 
