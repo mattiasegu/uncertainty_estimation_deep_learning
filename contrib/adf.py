@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import math
 import operator
 from collections import OrderedDict
 from itertools import islice
@@ -10,6 +11,7 @@ import torch
 import torch.nn as nn
 from torch.nn.parameter import Parameter
 from torch.nn import functional as F
+from torch.nn import init
 from torch.nn.modules.conv import _ConvNd
 from torch.nn.modules.conv import _ConvTransposeMixin
 from torch.nn.modules.utils import _pair
@@ -23,22 +25,22 @@ class AvgPool2d(nn.Module):
     def __init__(self, keep_variance_fn=None):
         super(AvgPool2d, self).__init__()
         self._keep_variance_fn = keep_variance_fn
-        
+
     def forward(self, inputs_mean, inputs_variance, kernel_size):
         outputs_mean = F.avg_pool2d(inputs_mean, kernel_size)
         outputs_variance = F.avg_pool2d(inputs_variance, kernel_size)
         outputs_variance = outputs_variance/(inputs_mean.size(2)*inputs_mean.size(3))
-        
+
         if self._keep_variance_fn is not None:
             outputs_variance = self._keep_variance_fn(outputs_variance)
-            
-        # TODO: avg pooling means that every neuron is multiplied by the same 
-        #       weight, that is 1/number of neurons in the channel 
+
+        # TODO: avg pooling means that every neuron is multiplied by the same
+        #       weight, that is 1/number of neurons in the channel
         #      outputs_variance*1/(H*W) should be enough already
-        
+
         return outputs_mean, outputs_variance
-    
-    
+
+
 class Softmax(nn.Module):
     def __init__(self, dim=1, keep_variance_fn=None):
         super(Softmax, self).__init__()
@@ -47,28 +49,28 @@ class Softmax(nn.Module):
 
     def forward(self, features_mean, features_variance, eps=1e-5):
         """Softmax function applied to a multivariate Gaussian distribution.
-        It works under the assumption that features_mean and features_variance 
-        are the parameters of a the indepent gaussians that contribute to the 
-        multivariate gaussian. 
+        It works under the assumption that features_mean and features_variance
+        are the parameters of a the indepent gaussians that contribute to the
+        multivariate gaussian.
         Mean and variance of the log-normal distribution are computed following
         https://en.wikipedia.org/wiki/Log-normal_distribution."""
-        
+
         log_gaussian_mean = features_mean + 0.5 * features_variance
         log_gaussian_variance = 2 * log_gaussian_mean
-        
+
         log_gaussian_mean = torch.exp(log_gaussian_mean)
         log_gaussian_variance = torch.exp(log_gaussian_variance)
         log_gaussian_variance = log_gaussian_variance*(torch.exp(features_variance)-1)
-        
+
         constant = torch.sum(log_gaussian_mean, dim=self.dim) + eps
         constant = constant.unsqueeze(self.dim)
         outputs_mean = log_gaussian_mean/constant
         outputs_variance = log_gaussian_variance/(constant**2)
-        
+
         if self._keep_variance_fn is not None:
             outputs_variance = self._keep_variance_fn(outputs_variance)
         return outputs_mean, outputs_variance
-    
+
 
 class ReLU(nn.Module):
     def __init__(self, keep_variance_fn=None):
@@ -132,14 +134,14 @@ class Dropout(nn.Module):
         if self.training:
             binary_mask = torch.ones_like(inputs_mean)
             binary_mask = F.dropout2d(binary_mask, self.p, self.training, self.inplace)
-            
+
             outputs_mean = inputs_mean*binary_mask
             outputs_variance = inputs_variance*binary_mask**2
-            
+
             if self._keep_variance_fn is not None:
                 outputs_variance = self._keep_variance_fn(outputs_variance)
             return outputs_mean, outputs_variance
-        
+
         outputs_variance = inputs_variance
         if self._keep_variance_fn is not None:
             outputs_variance = self._keep_variance_fn(outputs_variance)
@@ -200,6 +202,14 @@ class Linear(nn.Module):
             self.bias = Parameter(torch.Tensor(out_features))
         else:
             self.register_parameter('bias', None)
+        self.reset_parameters()
+
+    def reset_parameters(self) -> None:
+        init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+        if self.bias is not None:
+            fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
+            bound = 1 / math.sqrt(fan_in)
+            init.uniform_(self.bias, -bound, bound)
 
     def forward(self, inputs_mean, inputs_variance):
         outputs_mean = F.linear(inputs_mean, self.weight, self.bias)
