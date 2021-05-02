@@ -17,6 +17,7 @@ If you use this code in academic context, please cite the following publication:
 
 ## Video
 CHECK OUT a video demo of our framework [HERE](https://www.youtube.com/watch?v=X7n-bRS5vSM).
+Watch the [ICRA2020 Pitch Video](https://youtu.be/HZOxLgsk8E0) for an introduction to this work.
 
 ## Prerequisites
 - torch 1.4.0
