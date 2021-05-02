@@ -239,7 +239,7 @@ def evaluate(net, use_adf=False, use_mcdo=False):
             
             # Compute negative log-likelihood (if variance estimate available)
             if outputs_variance is not None:
-                batch_log_likelihood = compute_log_likelihood(outputs_mean, one_hot_targets, outputs_variance)
+                batch_log_likelihood = compute_log_likelihood(outputs_mean, one_hot_targets, torch.sqrt(outputs_variance))
                 batch_neg_log_likelihood = -batch_log_likelihood
                 # Sum along batch dimension
                 neg_log_likelihood += torch.sum(batch_neg_log_likelihood, 0).cpu().numpy().item()
